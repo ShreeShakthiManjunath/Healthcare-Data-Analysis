@@ -1,0 +1,159 @@
+# =========================================
+# STEP 1: Install & Import Libraries
+# =========================================
+!pip install seaborn scikit-learn scipy -q
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, r2_score
+from scipy.stats import norm
+
+print("Libraries Loaded Successfully")
+
+
+# =========================================
+# STEP 2: Create Healthcare Dataset
+# =========================================
+np.random.seed(42)
+
+df = pd.DataFrame({
+    "Age": np.random.randint(20, 70, 50),
+    "Blood_Pressure": np.random.randint(80, 180, 50),
+    "Cholesterol": np.random.randint(150, 300, 50),
+    "Heart_Rate": np.random.randint(60, 120, 50),
+    "Glucose": np.random.randint(70, 200, 50)
+})
+
+print("\nHealthcare Dataset:")
+print(df.head())
+
+
+# =========================================
+# STEP 3: Handle Missing Values
+# =========================================
+df.iloc[5,1] = np.nan
+df.iloc[10,3] = np.nan
+
+print("\nMissing Values Before:")
+print(df.isnull().sum())
+
+df.fillna(df.mean(), inplace=True)
+
+print("\nMissing Values After:")
+print(df.isnull().sum())
+
+
+# =========================================
+# STEP 4: Data Filtering
+# =========================================
+high_risk = df[df["Blood_Pressure"] > 140]
+
+print("\nHigh Risk Patients:")
+print(high_risk.head())
+
+
+# =========================================
+# STEP 5: Heatmap
+# =========================================
+plt.figure(figsize=(8,6))
+sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
+plt.title("Healthcare Data Correlation")
+plt.show()
+
+
+# =========================================
+# STEP 6: Z-Test
+# =========================================
+sample = np.random.normal(120, 15, 40)
+
+mean = np.mean(sample)
+std = np.std(sample)
+n = len(sample)
+
+z = (mean - 110) / (std/np.sqrt(n))
+critical = norm.ppf(0.95)
+
+print("\nZ-Test:")
+print("Z Score:", z)
+
+if z > critical:
+    print("Reject Null Hypothesis")
+else:
+    print("Accept Null Hypothesis")
+
+
+# =========================================
+# STEP 7: Linear Regression
+# =========================================
+X = df[["Age"]]
+y = df["Blood_Pressure"]
+
+lr = LinearRegression()
+lr.fit(X, y)
+
+pred = lr.predict(X)
+
+plt.scatter(X, y)
+plt.plot(X, pred)
+plt.title("Age vs Blood Pressure")
+plt.show()
+
+print("R2 Score:", r2_score(y, pred))
+
+
+# =========================================
+# STEP 8: Logistic Regression
+# =========================================
+df["Disease"] = (df["Blood_Pressure"] > 130).astype(int)
+
+X = df.drop("Disease", axis=1)
+y = df["Disease"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+model = LogisticRegression(max_iter=200)
+model.fit(X_train, y_train)
+
+pred = model.predict(X_test)
+
+print("\nAccuracy:", accuracy_score(y_test, pred))
+
+sns.heatmap(confusion_matrix(y_test, pred), annot=True)
+plt.title("Confusion Matrix")
+plt.show()
+
+
+# =========================================
+# STEP 9: NumPy Operations
+# =========================================
+arr = np.array([70, 80, 90, 100])
+
+print("\nMean:", np.mean(arr))
+print("Sum:", np.sum(arr))
+
+
+# =========================================
+# STEP 10: Trend Visualization
+# =========================================
+months = ["Jan","Feb","Mar","Apr"]
+patients = [20, 30, 40, 50]
+
+plt.plot(months, patients, marker='o')
+plt.title("Patient Growth Trend")
+plt.show()
+
+
+# =========================================
+# FINAL
+# =========================================
+print("\nPROJECT EXECUTED SUCCESSFULLY ✅")
